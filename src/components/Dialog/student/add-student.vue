@@ -19,7 +19,7 @@
           style="width: 90%;magin: 0 auto;"
         >
           <el-form-item label="班级:" prop="class">
-            <el-select v-model="form.class" placeholder="请选择">
+            <el-select v-model="form.class._id" placeholder="请选择">
               <el-option
                 v-for="item in classes"
                 :key="item._id"
@@ -62,7 +62,7 @@ export default {
   data() {
     return {
       dialogVisible: false,
-      title: '新增用户',
+      title: '新增学生',
       loading: false,
       roleList: [],
       hasId: false,
@@ -70,7 +70,9 @@ export default {
         className: '',
         phone: '',
         name: '',
-        class: ''
+        class: {
+
+        }
       },
       sexOption: [
         {
@@ -97,7 +99,7 @@ export default {
         className: '',
         phone: '',
         name: '',
-        class: ''
+        class: {}
       }
       this.classes = []
     },
@@ -128,13 +130,13 @@ export default {
       })
       if (row) {
         const data = Object.assign({}, row)
-        this.title = '编辑用户'
+        this.title = '编辑学生'
         this.hasId = true
         this.form = data
       } else {
         this.initData()
         this.hasId = false
-        this.title = '新增用户'
+        this.title = '新增学生'
       }
       this.$refs.addSettle.showDialog()
     },

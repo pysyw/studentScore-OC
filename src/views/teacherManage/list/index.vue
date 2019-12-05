@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-container">
     <div class="utilsWrap" style="display:flex;justify-content:space-between">
-      <el-input v-model="queryList.studentName" placeholder="请输入老师名字" style="width:300px">
+      <el-input v-model="queryList.teacherName" placeholder="请输入老师名字" style="width:300px">
         <el-button slot="append" icon="el-icon-search" @click="getLists" />
       </el-input>
       <el-button size="large" type="primary" @click="showDialog('addTeacher')">新增</el-button>
@@ -31,6 +31,7 @@
         />
         <el-table-column
           label="所教班级"
+          width="180px"
         >
           <template slot-scope="scope">
             <span>{{ scope.row.class.map(item=>{
@@ -81,7 +82,7 @@
 </template>
 
 <script>
-import { getTeacher, deleteStudent } from '@/api/teacher'
+import { getTeacher, deleteTeacher } from '@/api/teacher'
 import { vPopover, addTeacher } from './components'
 export default {
   name: 'Dashboard',
@@ -96,7 +97,7 @@ export default {
       queryList: {
         pageNum: 1,
         pageSize: 3,
-        studentName: ''
+        teacherName: ''
       }
     }
   },
@@ -116,7 +117,7 @@ export default {
       this.$refs[ele].show(row)
     },
     handleDelete(row) {
-      deleteStudent(row._id).then(res => {
+      deleteTeacher(row._id).then(res => {
         if (res.code === 200) {
           this.$message({ message: '删除成功', type: 'success' })
           this.getLists()

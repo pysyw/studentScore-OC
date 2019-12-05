@@ -7,9 +7,23 @@ export function getTeacher(params) {
     params
   })
 }
-export function deleteStudent(id) {
+export function deleteTeacher(id) {
   return request({
-    url: `/api/student/remove?_id=${id}`,
+    url: `/api/teacher/remove?_id=${id}`,
     method: 'delete'
+  })
+}
+export function addTeacher(data) {
+  return request({
+    url: '/api/addTeacher',
+    method: 'post',
+    data
+  })
+}
+export function editTeacher(data) {
+  return request({
+    url: '/api/editTeacher',
+    method: 'PUT',
+    data
   })
 }

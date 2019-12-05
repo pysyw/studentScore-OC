@@ -46,20 +46,20 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/studentManage',
     children: [{
-      path: 'dashboard',
-      name: 'Dashboard',
-      component: () => import('@/views/dashboard/index'),
+      path: 'studentManage',
+      name: 'StudentManage',
+      component: () => import('@/views/studentManage/index'),
       meta: { title: '学生管理', icon: 'dashboard' }
     }]
   },
 
   {
-    path: '/example',
+    path: '/teacherManage',
     component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
+    redirect: '/teacherManage/table',
+    name: 'TeacherManage',
     meta: { title: '教师管理', icon: 'example' },
     children: [
       {
@@ -69,8 +69,8 @@ export const constantRoutes = [
         meta: { title: '教师列表', icon: 'table' }
       },
       {
-        path: 'tree',
-        name: 'Tree',
+        path: 'chart',
+        name: 'Chart',
         component: () => import('@/views/tree/index'),
         meta: { title: 'Tree', icon: 'tree' }
       }

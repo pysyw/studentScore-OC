@@ -18,8 +18,22 @@
           size="medium"
           style="width: 90%;magin: 0 auto;"
         >
+          <el-form-item label="图片:" prop="avatar">
+            <template>
+              <el-upload
+                class="avatar-uploader"
+                :action="photoUpload"
+                :show-file-list="false"
+                :on-success="handleUploadSuccess"
+                :before-upload="beforeUpload"
+              >
+                <img v-if="form.avatar" :src="form.avatar" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon" />
+              </el-upload>
+            </template>
+          </el-form-item>
           <el-form-item label="班级:" prop="class">
-            <el-select v-model="form.class" placeholder="请选择">
+            <el-select v-model="form.class" multiple placeholder="请选择">
               <el-option
                 v-for="item in classes"
                 :key="item._id"
@@ -28,7 +42,7 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="学生姓名:" prop="name">
+          <el-form-item label="教师姓名:" prop="name">
             <el-input v-model="form.name" />
           </el-form-item>
           <el-form-item label="性别:" prop="sex">
@@ -52,7 +66,8 @@
 
 <script>
 import vDialog from '../v-dialog'
-import { editStudent, addTeacher } from '@/api/student'
+import { photoUpload } from '@/api/upload'
+import { editTeacher, addTeacher } from '@/api/teacher'
 import { getClass } from '@/api/class'
 export default {
   name: 'AddUser',
@@ -66,11 +81,13 @@ export default {
       loading: false,
       roleList: [],
       hasId: false,
+      photoUpload: photoUpload,
       form: {
-        className: '',
         phone: '',
         name: '',
-        class: ''
+        class: [],
+        avatar: '',
+        sex: ''
       },
       sexOption: [
         {
@@ -94,10 +111,11 @@ export default {
     initData() {
       this.hasId = false
       this.form = {
-        className: '',
+        sex: '',
+        avatar: '',
         phone: '',
         name: '',
-        class: ''
+        class: []
       }
       this.classes = []
     },
@@ -112,7 +130,7 @@ export default {
           }
         })
       } else { // 编辑
-        editStudent(this.form).then(res => {
+        editTeacher(this.form).then(res => {
           if (res.code === 200) {
             this.$message({ message: '新增成功', type: 'success' })
             this.hide()
@@ -121,17 +139,29 @@ export default {
         })
       }
     },
+    // 上传图片
+    handleUploadSuccess(res, file) {
+      this.$message.success('上传头像成功')
+      this.form.avatar = res.path
+      // this.form.avatar = URL.createObjectURL(file.raw)
+    },
+    beforeUpload() {
+      console.log(2)
+    },
     show(row) {
       this.initData()
       getClass().then(res => {
         this.classes = res.data.rows
       })
       if (row) {
-        console.log(row)
         const data = Object.assign({}, row)
         this.title = '编辑用户'
         this.hasId = true
         this.form = data
+        this.form.class = data.class.map(item => {
+          return item._id
+        })
+        console.log(this.form)
       } else {
         this.initData()
         this.hasId = false
@@ -146,3 +176,28 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+   /deep/.avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  /deep/.avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  /deep/.avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+</style>

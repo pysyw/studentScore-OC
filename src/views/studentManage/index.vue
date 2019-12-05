@@ -78,7 +78,7 @@ export default {
       pageTotal: 0,
       queryList: {
         pageNum: 1,
-        pageSize: 3,
+        pageSize: 5,
         studentName: ''
       }
     }
