@@ -1,10 +1,10 @@
 <template>
   <div class="dashboard-container">
     <div class="utilsWrap" style="display:flex;justify-content:space-between">
-      <el-input v-model="queryList.studentName" placeholder="请输入学生名字" style="width:300px">
-        <el-button slot="append" icon="el-icon-search" @click="getLists(true)" />
+      <el-input v-model="queryList.teacherName" placeholder="请输入老师名字" style="width:300px">
+        <el-button slot="append" icon="el-icon-search" @click="getLists" />
       </el-input>
-      <el-button size="large" type="primary" @click="showDialog('addStudent')">新增</el-button>
+      <el-button size="large" type="primary" @click="showDialog('addTeacher')">新增</el-button>
     </div>
     <div class="tableWrap">
       <el-table
@@ -13,14 +13,32 @@
         :border="true"
         style="width: 100%"
       >
+        <el-table-column label="图片">
+          <template slot-scope="scope">
+            <!-- <el-image
+              style="width: 100px; height: 100px"
+              :src="scope.row.avatar"
+              fit="fit"
+            /> -->
+            <div style="display:flex;justify-content:center">
+              <img :src="scope.row.avatar" style="width: 100px; height: 100px">
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column
           prop="name"
           label="姓名"
         />
         <el-table-column
-          prop="class.name"
-          label="班级"
-        />
+          label="所教班级"
+          width="180px"
+        >
+          <template slot-scope="scope">
+            <span>{{ scope.row.class.map(item=>{
+              return item.name
+            }).join() }}</span>
+          </template>
+        </el-table-column>
         <el-table-column
           prop="sex"
           label="性别"
@@ -43,7 +61,7 @@
               btn-text="删除"
               @handleConfirm="handleDelete(scope.row)"
             />
-            <el-button size="small" type="text" @click="showDialog('addStudent', scope.row)">编辑</el-button>
+            <el-button size="small" type="text" @click="showDialog('addTeacher', scope.row)">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -59,18 +77,18 @@
         @current-change="handleCurrentChange"
       />
     </div>
-    <add-student ref="addStudent" @success="getLists" />
+    <add-teacher ref="addTeacher" @success="getLists" />
   </div>
 </template>
 
 <script>
-import { getStudent, deleteStudent } from '@/api/student'
-import { vPopover, addStudent } from './components'
+import { getTeacher, deleteTeacher } from '@/api/teacher'
+import { vPopover, addTeacher } from './components'
 export default {
   name: 'Dashboard',
   components: {
     vPopover,
-    addStudent
+    addTeacher
   },
   data() {
     return {
@@ -78,8 +96,8 @@ export default {
       pageTotal: 0,
       queryList: {
         pageNum: 1,
-        pageSize: 5,
-        studentName: ''
+        pageSize: 3,
+        teacherName: ''
       }
     }
   },
@@ -87,15 +105,11 @@ export default {
     this.getLists()
   },
   methods: {
-    getLists(search) {
-      if (search) {
-        this.queryList.pageNum = 1
-        this.queryList.pageSize = 5
-      }
-      getStudent(this.queryList).then(res => {
+    getLists() {
+      getTeacher(this.queryList).then(res => {
         if (res.code === 200) {
-          this.tableData = res.data.rows
-          this.pageTotal = res.data.total
+          this.tableData = res.data
+          this.pageTotal = res.total
         }
       })
     },
@@ -103,7 +117,7 @@ export default {
       this.$refs[ele].show(row)
     },
     handleDelete(row) {
-      deleteStudent(row._id).then(res => {
+      deleteTeacher(row._id).then(res => {
         if (res.code === 200) {
           this.$message({ message: '删除成功', type: 'success' })
           this.getLists()
