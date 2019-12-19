@@ -4,7 +4,29 @@
       <el-input v-model="queryList.teacherName" placeholder="请输入老师名字" style="width:300px">
         <el-button slot="append" icon="el-icon-search" @click="getLists" />
       </el-input>
-      <el-button size="large" type="primary" @click="showDialog('addTeacher')">新增</el-button>
+      <div class="examSelectWrap">
+        <span>选择考试类别：</span>
+        <el-select v-model="queryList.examType" placeholder="请选择">
+          <el-option
+            v-for="item in examOption"
+            :key="item._id"
+            :label="item.exmaTypeName"
+            :value="item._id"
+          />
+        </el-select>
+      </div>
+      <div class="classSelectWrap">
+        <span>选择班级：</span>
+        <el-select v-model="queryList.class" placeholder="请选择">
+          <el-option
+            v-for="item in classOption"
+            :key="item._id"
+            :label="item.name"
+            :value="item._id"
+          />
+        </el-select>
+      </div>
+      <el-button size="large" type="primary" @click="showDialog('addScore')">新增</el-button>
     </div>
     <div class="tableWrap">
       <el-table
@@ -13,45 +35,35 @@
         :border="true"
         style="width: 100%"
       >
-        <el-table-column label="图片">
-          <template slot-scope="scope">
-            <!-- <el-image
-              style="width: 100px; height: 100px"
-              :src="scope.row.avatar"
-              fit="fit"
-            /> -->
-            <div style="display:flex;justify-content:center">
-              <img :src="scope.row.avatar" style="width: 100px; height: 100px">
-            </div>
-          </template>
-        </el-table-column>
+        <el-table-column prop="examType.exmaTypeName" label="考试类型" />
+        <el-table-column prop="examType.date" label="考试时间" />
+        <el-table-column prop="subjectName.name" label="考试科目" />
         <el-table-column
-          prop="name"
-          label="姓名"
+          prop="studentId.name"
+          label="学生姓名"
         />
         <el-table-column
-          label="所教班级"
+          label="学生班级"
           width="180px"
         >
           <template slot-scope="scope">
-            <span>{{ scope.row.class.map(item=>{
-              return item.name
-            }).join() }}</span>
+            <span>{{ scope.row.studentId.class.name }}</span>
           </template>
         </el-table-column>
         <el-table-column
-          prop="sex"
+          prop="studentId.sex"
           label="性别"
         >
           <template slot-scope="scope">
-            <span v-if="scope.row.sex === 1">男</span>
-            <span v-else-if="scope.row.sex === 0">女</span>
+            <span v-if="scope.row.studentId.sex === 1">男</span>
+            <span v-else-if="scope.row.studentId.sex === 0">女</span>
           </template>
         </el-table-column>
         <el-table-column
-          prop="phone"
+          prop="studentId.phone"
           label="手机"
         />
+        <el-table-column prop="score" label="成绩" />
         <el-table-column label="操作">
           <template slot-scope="scope">
             <v-popover
@@ -61,7 +73,7 @@
               btn-text="删除"
               @handleConfirm="handleDelete(scope.row)"
             />
-            <el-button size="small" type="text" @click="showDialog('addTeacher', scope.row)">编辑</el-button>
+            <el-button size="small" type="text" @click="showDialog('addScore', scope.row)">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -77,18 +89,20 @@
         @current-change="handleCurrentChange"
       />
     </div>
-    <add-teacher ref="addTeacher" @success="getLists" />
+    <add-score ref="addScore" @success="getLists" />
   </div>
 </template>
 
 <script>
-import { getTeacher, deleteTeacher } from '@/api/teacher'
-import { vPopover, addTeacher } from './components'
+import { deleteTeacher } from '@/api/teacher'
+import { getClass } from '@/api/class'
+import { getStudentScore, getExamType } from '@/api/score'
+import { vPopover, addScore } from './components'
 export default {
   name: 'Dashboard',
   components: {
     vPopover,
-    addTeacher
+    addScore
   },
   data() {
     return {
@@ -97,20 +111,44 @@ export default {
       queryList: {
         pageNum: 1,
         pageSize: 3,
-        teacherName: ''
-      }
+        teacherName: '',
+        examType: '',
+        class: ''
+      },
+      examOption: [],
+      classOption: []
     }
   },
   mounted() {
     this.getLists()
+    this.getExamCatogrey()
+    this.getClassList()
   },
   methods: {
     getLists() {
-      getTeacher(this.queryList).then(res => {
+      getStudentScore().then(res => {
         if (res.code === 200) {
           this.tableData = res.data
           this.pageTotal = res.total
         }
+      })
+    },
+    getExamCatogrey() {
+      getExamType().then(res => {
+        if (res.code === 200) {
+          this.examOption = res.data
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    getClassList() {
+      getClass().then(res => {
+        if (res.code === 200) {
+          this.classOption = res.data.rows
+        }
+      }).catch(err => {
+        console.log(err)
       })
     },
     showDialog(ele, row) {
@@ -148,5 +186,15 @@ export default {
     }
 .tableWrap{
   padding: 30px 0
+}
+.examSelectWrap,.classSelectWrap {
+  font-size: 13px;
+  color: #666
+}
+.examSelectWrap .el-select,.classSelectWrap .el-select{
+  width: 100px;
+  /deep/.el-input__inner{
+    border:none
+  }
 }
 </style>
