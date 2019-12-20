@@ -1,6 +1,6 @@
 <template>
   <v-dialog
-    ref="addScore"
+    ref="editScore"
     left-btn="确定"
     width="600px"
     :title="title"
@@ -19,28 +19,28 @@
           style="width: 90%;magin: 0 auto;"
         >
           <el-form-item label="班级:" prop="class">
-            <el-select v-model="form.class" placeholder="请选择">
+            <el-input v-model="rowData.className" disabled />
+          </el-form-item>
+          <el-form-item label="学生姓名:" prop="phone">
+            <el-input v-model="rowData.studentName" disabled />
+          </el-form-item>
+          <el-form-item label="考试类别:" prop="name">
+            <el-select v-model="form.examTypeId" placeholder="请选择">
               <el-option
-                v-for="item in classes"
-                :key="item._id"
-                :label="item.name"
+                v-for="(item,index) in examTypeList"
+                :key="index"
+                :label="item.exmaTypeName"
                 :value="item._id"
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="学生姓名:" prop="phone">
-            <el-input v-model="form.studentId" />
-          </el-form-item>
-          <el-form-item label="考试类别:" prop="name">
-            <el-input v-model="form.examTypeId" />
-          </el-form-item>
           <el-form-item label="科目:" prop="sex">
-            <el-select v-model="form.subjectId" placeholder="请选择" :disabled="hasId">
+            <el-select v-model="form.subjectId" placeholder="请选择">
               <el-option
-                v-for="(item,index) in sexOption"
+                v-for="(item,index) in subjectList"
                 :key="index"
                 :label="item.name"
-                :value="item.val"
+                :value="item._id"
               />
             </el-select>
           </el-form-item>
@@ -55,10 +55,10 @@
 
 <script>
 import vDialog from '../v-dialog'
-import { photoUpload } from '@/api/upload'
-import { editTeacher, addTeacher } from '@/api/teacher'
+import { editExamType } from '@/api/score'
 import { getClass } from '@/api/class'
 import { getExamType } from '@/api/examType'
+import { getSubject } from '@/api/subject'
 export default {
   name: 'AddUser',
   components: {
@@ -67,11 +67,8 @@ export default {
   data() {
     return {
       dialogVisible: false,
-      title: '新增用户',
+      title: '编辑用户',
       loading: false,
-      roleList: [],
-      hasId: false,
-      photoUpload: photoUpload,
       rowData: {
         class: '',
         studentName: ''
@@ -93,45 +90,37 @@ export default {
         }
       ],
       classes: [],
-      examTypeList: [],
       formRules: {
-        class: [{ required: true, message: '请输入用户名' }],
-        phone: [{ required: true, message: '请输入手机号' }],
-        name: [{ required: true, message: '请输入姓名' }] }
+        // class: [{ required: true, message: '请输入用户名' }],
+        // phone: [{ required: true, message: '请输入手机号' }],
+        // name: [{ required: true, message: '请输入姓名' }]
+      },
+      examTypeList: [],
+      subjectList: []
     }
   },
   methods: {
     /** 初始化表单 **/
     initData() {
-      this.hasId = false
       this.form = {
         score: '',
         subjectId: '',
         examTypeId: '',
         studentId: ''
       }
-      this.classes = []
       this.examTypeList = []
+      this.classes = []
+      this.subjectList = []
     },
     /** 点击表单提交成功 **/
     successForm() {
-      if (!this.form._id) { // 新增
-        addTeacher(this.form).then(res => {
-          if (res.code === 200) {
-            this.$message({ message: '新增成功', type: 'success' })
-            this.hide()
-            this.$emit('success')
-          }
-        })
-      } else { // 编辑
-        editTeacher(this.form).then(res => {
-          if (res.code === 200) {
-            this.$message({ message: '新增成功', type: 'success' })
-            this.hide()
-            this.$emit('success')
-          }
-        })
-      }
+      editExamType(this.form).then(res => {
+        if (res.code === 200) {
+          this.$message({ message: '新增成功', type: 'success' })
+          this.hide()
+          this.$emit('success')
+        }
+      })
     },
     show(row) {
       this.initData()
@@ -141,14 +130,26 @@ export default {
       getExamType().then(res => {
         this.examTypeList = res.data.rows
       })
-      this.initData()
-      this.hasId = false
-      this.title = '新增用户'
-      this.$refs.addScore.showDialog()
+      getSubject().then(res => {
+        this.subjectList = res.data.rows
+      })
+      const data = Object.assign({}, row)
+      this.form = {
+        score: data.score,
+        subjectId: data.subjectName._id,
+        examTypeId: data.examType._id,
+        studentId: data.studentId._id
+      }
+      this.rowData = {
+        className: data.studentId.class.name,
+        studentName: data.studentId.name
+      }
+      this.form.class = data.studentId.class.name
+      this.$refs.editScore.showDialog()
     },
     hide() {
       this.initData()
-      this.$refs.addScore.closeDialog()
+      this.$refs.editScore.closeDialog()
     }
   }
 }

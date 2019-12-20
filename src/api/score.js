@@ -14,3 +14,20 @@ export function getExamType() {
     method: 'get'
   })
 }
+
+/** 根据Id删除对应成绩 **/
+export function removeScore(id) {
+  return request({
+    url: `/api/removeScore?id=${id}`,
+    method: 'delete'
+  })
+}
+
+/** 修改学生成绩*/
+export function editExamType(data) {
+  return request({
+    url: '/api/editScore',
+    method: 'PUT',
+    data
+  })
+}

@@ -1,12 +1,26 @@
 <template>
   <div class="dashboard-container">
-    <div class="utilsWrap" style="display:flex;justify-content:space-between">
-      <el-input v-model="queryList.teacherName" placeholder="请输入老师名字" style="width:300px">
-        <el-button slot="append" icon="el-icon-search" @click="getLists" />
+    <div
+      class="utilsWrap"
+      style="display:flex;justify-content:space-between"
+    >
+      <el-input
+        v-model="queryList.teacherName"
+        placeholder="请输入老师名字"
+        style="width:300px"
+      >
+        <el-button
+          slot="append"
+          icon="el-icon-search"
+          @click="getLists"
+        />
       </el-input>
       <div class="examSelectWrap">
         <span>选择考试类别：</span>
-        <el-select v-model="queryList.examType" placeholder="请选择">
+        <el-select
+          v-model="queryList.examType"
+          placeholder="请选择"
+        >
           <el-option
             v-for="item in examOption"
             :key="item._id"
@@ -17,7 +31,10 @@
       </div>
       <div class="classSelectWrap">
         <span>选择班级：</span>
-        <el-select v-model="queryList.class" placeholder="请选择">
+        <el-select
+          v-model="queryList.class"
+          placeholder="请选择"
+        >
           <el-option
             v-for="item in classOption"
             :key="item._id"
@@ -26,7 +43,11 @@
           />
         </el-select>
       </div>
-      <el-button size="large" type="primary" @click="showDialog('addScore')">新增</el-button>
+      <el-button
+        size="large"
+        type="primary"
+        @click="showDialog('addScore')"
+      >新增</el-button>
     </div>
     <div class="tableWrap">
       <el-table
@@ -35,9 +56,18 @@
         :border="true"
         style="width: 100%"
       >
-        <el-table-column prop="examType.exmaTypeName" label="考试类型" />
-        <el-table-column prop="examType.date" label="考试时间" />
-        <el-table-column prop="subjectName.name" label="考试科目" />
+        <el-table-column
+          prop="examType.exmaTypeName"
+          label="考试类型"
+        />
+        <el-table-column
+          prop="examType.date"
+          label="考试时间"
+        />
+        <el-table-column
+          prop="subjectName.name"
+          label="考试科目"
+        />
         <el-table-column
           prop="studentId.name"
           label="学生姓名"
@@ -63,7 +93,10 @@
           prop="studentId.phone"
           label="手机"
         />
-        <el-table-column prop="score" label="成绩" />
+        <el-table-column
+          prop="score"
+          label="成绩"
+        />
         <el-table-column label="操作">
           <template slot-scope="scope">
             <v-popover
@@ -73,7 +106,11 @@
               btn-text="删除"
               @handleConfirm="handleDelete(scope.row)"
             />
-            <el-button size="small" type="text" @click="showDialog('addScore', scope.row)">编辑</el-button>
+            <el-button
+              size="small"
+              type="text"
+              @click="showDialog('editScore', scope.row)"
+            >编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -89,20 +126,27 @@
         @current-change="handleCurrentChange"
       />
     </div>
-    <add-score ref="addScore" @success="getLists" />
+    <add-score
+      ref="addScore"
+      @success="getLists"
+    />
+    <edit-score
+      ref="editScore"
+      @success="getLists"
+    />
   </div>
 </template>
 
 <script>
-import { deleteTeacher } from '@/api/teacher'
 import { getClass } from '@/api/class'
-import { getStudentScore, getExamType } from '@/api/score'
-import { vPopover, addScore } from './components'
+import { getStudentScore, getExamType, removeScore } from '@/api/score'
+import { vPopover, addScore, editScore } from './components'
 export default {
   name: 'Dashboard',
   components: {
     vPopover,
-    addScore
+    addScore,
+    editScore
   },
   data() {
     return {
@@ -155,7 +199,7 @@ export default {
       this.$refs[ele].show(row)
     },
     handleDelete(row) {
-      deleteTeacher(row._id).then(res => {
+      removeScore(row._id).then(res => {
         if (res.code === 200) {
           this.$message({ message: '删除成功', type: 'success' })
           this.getLists()
@@ -182,19 +226,21 @@ export default {
   }
 }
 .pagination-wrapper {
-      padding: 20px 30px;
-    }
-.tableWrap{
-  padding: 30px 0
+  padding: 20px 30px;
 }
-.examSelectWrap,.classSelectWrap {
+.tableWrap {
+  padding: 30px 0;
+}
+.examSelectWrap,
+.classSelectWrap {
   font-size: 13px;
-  color: #666
+  color: #666;
 }
-.examSelectWrap .el-select,.classSelectWrap .el-select{
+.examSelectWrap .el-select,
+.classSelectWrap .el-select {
   width: 100px;
-  /deep/.el-input__inner{
-    border:none
+  /deep/.el-input__inner {
+    border: none;
   }
 }
 </style>
