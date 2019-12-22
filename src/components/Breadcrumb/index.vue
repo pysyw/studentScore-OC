@@ -46,7 +46,7 @@ export default {
       return name.trim().toLocaleLowerCase() === 'Dashboard'.toLocaleLowerCase()
     },
     pathCompile(path) {
-      // To solve this problem https://github.com/PanJiaChen/vue-element-admin/issues/561
+      // To solve this problem https://github.com/pysyw/studentScore-OC.git
       const { params } = this.$route
       var toPath = pathToRegexp.compile(path)
       return toPath(params)

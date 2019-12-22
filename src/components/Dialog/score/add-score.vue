@@ -19,7 +19,7 @@
           style="width: 90%;magin: 0 auto;"
         >
           <el-form-item label="班级:" prop="class">
-            <el-select v-model="form.class" placeholder="请选择">
+            <el-select v-model="cid" placeholder="请选择" @change="selectClass">
               <el-option
                 v-for="item in classes"
                 :key="item._id"
@@ -29,18 +29,42 @@
             </el-select>
           </el-form-item>
           <el-form-item label="学生姓名:" prop="phone">
-            <el-input v-model="form.studentId" />
-          </el-form-item>
-          <el-form-item label="考试类别:" prop="name">
-            <el-input v-model="form.examTypeId" />
-          </el-form-item>
-          <el-form-item label="科目:" prop="sex">
-            <el-select v-model="form.subjectId" placeholder="请选择" :disabled="hasId">
+            <el-select
+              v-model="form.studentId"
+              filterable
+              remote
+              :disabled="disable"
+              reserve-keyword
+              placeholder="请输入关键词"
+              :remote-method="remoteMethod"
+              :loading="loading"
+            >
               <el-option
-                v-for="(item,index) in sexOption"
+                v-for="(item, index) in studentList"
                 :key="index"
                 :label="item.name"
-                :value="item.val"
+                :value="item._id"
+              />
+            </el-select>
+            <div v-if="disable" class="el-form-item__error">请先选择班级在填写学生姓名</div>
+          </el-form-item>
+          <el-form-item label="考试类别:" prop="name">
+            <el-select v-model="form.examType" placeholder="请选择">
+              <el-option
+                v-for="(item,index) in examTypeList"
+                :key="index"
+                :label="item.exmaTypeName"
+                :value="item._id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="科目:" prop="sex">
+            <el-select v-model="form.subjectName" placeholder="请选择">
+              <el-option
+                v-for="(item,index) in subjectList"
+                :key="index"
+                :label="item.name"
+                :value="item._id"
               />
             </el-select>
           </el-form-item>
@@ -55,10 +79,11 @@
 
 <script>
 import vDialog from '../v-dialog'
-import { photoUpload } from '@/api/upload'
-import { editTeacher, addTeacher } from '@/api/teacher'
+import { addScore } from '@/api/score'
 import { getClass } from '@/api/class'
+import { findStudentByCid } from '@/api/score'
 import { getExamType } from '@/api/examType'
+import { getSubject } from '@/api/subject'
 export default {
   name: 'AddUser',
   components: {
@@ -67,73 +92,52 @@ export default {
   data() {
     return {
       dialogVisible: false,
-      title: '新增用户',
+      title: '新增成绩',
       loading: false,
-      roleList: [],
-      hasId: false,
-      photoUpload: photoUpload,
-      rowData: {
-        class: '',
-        studentName: ''
-      },
       form: {
         score: '',
-        subjectId: '',
-        examTypeId: '',
+        subjectName: '',
+        examType: '',
         studentId: ''
       },
-      sexOption: [
-        {
-          name: '男',
-          val: 1
-        },
-        {
-          name: '女',
-          val: 0
-        }
-      ],
+      disable: true,
       classes: [],
+      cid: '',
       examTypeList: [],
+      subjectList: [],
+      studentList: [],
       formRules: {
-        class: [{ required: true, message: '请输入用户名' }],
-        phone: [{ required: true, message: '请输入手机号' }],
-        name: [{ required: true, message: '请输入姓名' }] }
+        // class: [{ required: true, message: '请输入用户名' }],
+        // phone: [{ required: true, message: '请输入手机号' }],
+        // name: [{ required: true, message: '请输入姓名' }]
+      }
     }
   },
   methods: {
     /** 初始化表单 **/
     initData() {
-      this.hasId = false
       this.form = {
         score: '',
-        subjectId: '',
-        examTypeId: '',
+        subjectName: '',
+        examType: '',
         studentId: ''
       }
       this.classes = []
       this.examTypeList = []
+      this.subjectList = []
+      this.studentList = []
     },
     /** 点击表单提交成功 **/
     successForm() {
-      if (!this.form._id) { // 新增
-        addTeacher(this.form).then(res => {
-          if (res.code === 200) {
-            this.$message({ message: '新增成功', type: 'success' })
-            this.hide()
-            this.$emit('success')
-          }
-        })
-      } else { // 编辑
-        editTeacher(this.form).then(res => {
-          if (res.code === 200) {
-            this.$message({ message: '新增成功', type: 'success' })
-            this.hide()
-            this.$emit('success')
-          }
-        })
-      }
+      addScore(this.form).then(res => {
+        if (res.code === 200) {
+          this.$message({ message: '新增成功', type: 'success' })
+          this.hide()
+          this.$emit('success')
+        }
+      })
     },
-    show(row) {
+    show() {
       this.initData()
       getClass().then(res => {
         this.classes = res.data.rows
@@ -141,14 +145,33 @@ export default {
       getExamType().then(res => {
         this.examTypeList = res.data.rows
       })
-      this.initData()
-      this.hasId = false
-      this.title = '新增用户'
+      getSubject().then(res => {
+        this.subjectList = res.data.rows
+      })
       this.$refs.addScore.showDialog()
     },
     hide() {
       this.initData()
       this.$refs.addScore.closeDialog()
+    },
+    /** 选择班级 **/
+    selectClass(val) {
+      this.cid = val
+      findStudentByCid(this.cid).then(res => {
+        this.studentList = res.data
+        this.loading = false
+      })
+      this.disable = false
+    },
+    /** 远程搜索 */
+    remoteMethod(query) {
+      if (query !== '') {
+        this.studentList = this.studentList.filter(item => {
+          return item.name.indexOf(query) > -1
+        })
+      } else {
+        this.studentList = []
+      }
     }
   }
 }

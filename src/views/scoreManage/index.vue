@@ -4,8 +4,8 @@
       class="utilsWrap"
       style="display:flex;justify-content:space-between"
     >
-      <el-input
-        v-model="queryList.teacherName"
+      <!-- <el-input
+        v-model="queryList.studentName"
         placeholder="请输入老师名字"
         style="width:300px"
       >
@@ -14,31 +14,18 @@
           icon="el-icon-search"
           @click="getLists"
         />
-      </el-input>
+      </el-input> -->
       <div class="examSelectWrap">
         <span>选择考试类别：</span>
         <el-select
-          v-model="queryList.examType"
+          v-model="queryList.examTypeId"
           placeholder="请选择"
+          @change="getLists"
         >
           <el-option
             v-for="item in examOption"
             :key="item._id"
             :label="item.exmaTypeName"
-            :value="item._id"
-          />
-        </el-select>
-      </div>
-      <div class="classSelectWrap">
-        <span>选择班级：</span>
-        <el-select
-          v-model="queryList.class"
-          placeholder="请选择"
-        >
-          <el-option
-            v-for="item in classOption"
-            :key="item._id"
-            :label="item.name"
             :value="item._id"
           />
         </el-select>
@@ -155,11 +142,16 @@ export default {
       queryList: {
         pageNum: 1,
         pageSize: 3,
-        teacherName: '',
-        examType: '',
-        class: ''
+        studentName: '',
+        examTypeId: '',
+        classId: ''
       },
-      examOption: [],
+      examOption: [
+        {
+          exmaTypeName: '全部',
+          _id: ''
+        }
+      ],
       classOption: []
     }
   },
@@ -170,7 +162,7 @@ export default {
   },
   methods: {
     getLists() {
-      getStudentScore().then(res => {
+      getStudentScore(this.queryList).then(res => {
         if (res.code === 200) {
           this.tableData = res.data
           this.pageTotal = res.total
@@ -180,7 +172,7 @@ export default {
     getExamCatogrey() {
       getExamType().then(res => {
         if (res.code === 200) {
-          this.examOption = res.data
+          this.examOption = this.examOption.concat(res.data)
         }
       }).catch(err => {
         console.log(err)

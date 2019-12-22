@@ -55,7 +55,7 @@
 
 <script>
 import vDialog from '../v-dialog'
-import { editExamType } from '@/api/score'
+import { editScore } from '@/api/score'
 import { getClass } from '@/api/class'
 import { getExamType } from '@/api/examType'
 import { getSubject } from '@/api/subject'
@@ -114,7 +114,7 @@ export default {
     },
     /** 点击表单提交成功 **/
     successForm() {
-      editExamType(this.form).then(res => {
+      editScore(this.form).then(res => {
         if (res.code === 200) {
           this.$message({ message: '新增成功', type: 'success' })
           this.hide()

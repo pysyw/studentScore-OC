@@ -24,10 +24,26 @@ export function removeScore(id) {
 }
 
 /** 修改学生成绩*/
-export function editExamType(data) {
+export function editScore(data) {
   return request({
     url: '/api/editScore',
     method: 'PUT',
     data
+  })
+}
+
+/** 新增学生成绩*/
+export function addScore(data) {
+  return request({
+    url: '/api/addStudentScore',
+    method: 'POST',
+    data
+  })
+}
+/** 根据班级id查找学生 **/
+export function findStudentByCid(cid) {
+  return request({
+    url: `/api/getStudentByClassId?cid=${cid}`,
+    method: 'get'
   })
 }

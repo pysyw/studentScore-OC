@@ -6,7 +6,7 @@
 </template>
 
 <script>
-// doc: https://panjiachen.github.io/vue-element-admin-site/feature/component/svg-icon.html#usage
+// doc: https://github.com/pysyw/studentScore-OC.git
 import { isExternal } from '@/utils/validate'
 
 export default {
